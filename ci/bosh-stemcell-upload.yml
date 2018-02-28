@@ -1,0 +1,129 @@
+---
+resource_types:
+  - name: keyval
+    type: docker-image
+    source:
+      repository: swce/keyval-resource
+
+resources:
+
+  - name: ubuntu-stemcell
+    type: bosh-io-stemcell
+    source:
+      name: bosh-openstack-kvm-ubuntu-trusty-go_agent
+
+  - name: centos-stemcell
+    type: bosh-io-stemcell
+    source:
+      name: bosh-openstack-kvm-centos-7-go_agent
+
+  - name: devwatt-pipelines
+    type: git
+    source:
+      uri:    ((repositories.devwatt-ci.uri))
+      branch: ((repositories.devwatt-ci.branch))
+
+  - name: uploaded-version
+    type: keyval
+
+jobs:
+
+- name: upload-stemcell-ubuntu
+  plan:
+    - get: devwatt-pipelines
+
+    - aggregate:
+      - get: ubuntu-stemcell
+        trigger: true
+
+      - task: create-bosh-config
+        file: devwatt-pipelines/ci/common/tasks/create-bosh-config.yml
+        params:
+          CA_CERT:  ((bosh-server.ca))
+          IP:       ((bosh-server.ip))
+          ALIAS:    ((bosh-server.alias)) 
+          USER:     ((bosh-server.user))
+          PASSWORD: ((bosh-server.password))  
+
+    - task: upload-stemcell-ubuntu
+      file: devwatt-pipelines/ci/bosh-stemcell-upload/upload-stemcell/tasks/upload-stemcell.yml
+      params:
+          ALIAS:    ((bosh-server.alias))
+
+    - put: uploaded-version
+      params: {file: output/keyval.properties}      
+
+- name: stemcell-cleanup-ubuntu    
+  plan:
+    - get: devwatt-pipelines
+
+    - aggregate:
+      - get: uploaded-version
+        passed: [upload-stemcell-ubuntu]
+        trigger: true
+
+      - task: create-bosh-config
+        file: devwatt-pipelines/ci/common/tasks/create-bosh-config.yml
+        params:
+          CA_CERT:  ((bosh-server.ca))
+          IP:       ((bosh-server.ip))
+          ALIAS:    ((bosh-server.alias))
+          USER:     ((bosh-server.user))
+          PASSWORD: ((bosh-server.password))
+
+    - task: old-stemcells-cleanup
+      file: devwatt-pipelines/ci/bosh-stemcell-upload/old-stemcells-cleanup/tasks/old-stemcells-cleanup.yml
+      params:
+        ALIAS:        ((bosh-server.alias))
+        BS_STEMCELL:  ((stemcell.bootstrap))
+        OS:           ubuntu
+
+- name: upload-stemcell-centos
+  plan:
+    - get: devwatt-pipelines
+
+    - aggregate:
+      - get: centos-stemcell
+        trigger: true
+
+      - task: create-bosh-config
+        file: devwatt-pipelines/ci/common/tasks/create-bosh-config.yml
+        params:
+          CA_CERT:  ((bosh-server.ca))
+          IP:       ((bosh-server.ip))
+          ALIAS:    ((bosh-server.alias))
+          USER:     ((bosh-server.user))
+          PASSWORD: ((bosh-server.password))
+
+    - task: upload-stemcell-centos
+      file: devwatt-pipelines/ci/bosh-stemcell-upload/upload-stemcell-centos/tasks/upload-stemcell-centos.yml
+      params:
+        ALIAS:    ((bosh-server.alias))
+
+    - put: uploaded-version
+      params: {file: output/keyval.properties}
+
+- name: stemcell-cleanup-centos    
+  plan:
+    - get: devwatt-pipelines
+
+    - aggregate:
+      - get: uploaded-version
+        passed: [upload-stemcell-centos]
+        trigger: true
+
+      - task: create-bosh-config
+        file: devwatt-pipelines/ci/common/tasks/create-bosh-config.yml
+        params:
+          CA_CERT:  ((bosh-server.ca))
+          IP:       ((bosh-server.ip))
+          ALIAS:    ((bosh-server.alias))
+          USER:     ((bosh-server.user))
+          PASSWORD: ((bosh-server.password))
+
+    - task: old-stemcells-cleanup
+      file: devwatt-pipelines/ci/bosh-stemcell-upload/old-stemcells-cleanup/tasks/old-stemcells-cleanup.yml
+      params:
+        ALIAS:        ((bosh-server.alias))
+        BS_STEMCELL:  ((stemcell.bootstrap))
+        OS:           centos

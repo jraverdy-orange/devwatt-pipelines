@@ -1,0 +1,93 @@
+- type: replace
+  path: /instance_groups/name=alertmanager/vm_type
+  value: medium
+- type: replace
+  path: /instance_groups/name=alertmanager/networks/name=default/name
+  value: prometheus
+
+- type: replace
+  path: /instance_groups/name=prometheus/vm_type
+  value: medium
+- type: replace
+  path: /instance_groups/name=prometheus/networks/name=default/name
+  value: prometheus
+- type: replace
+  path: /instance_groups/name=prometheus/jobs/name=prometheus/properties/prometheus/rule_files/-
+  value: /var/vcap/jobs/mysql_alerts/*.alerts
+- type: replace
+  path: /instance_groups/name=prometheus/jobs/name=prometheus/properties/prometheus/rule_files/-
+  value: /var/vcap/jobs/shield_alerts/*.alerts
+- type: replace
+  path: /instance_groups/name=prometheus/jobs/name=prometheus/properties/prometheus/rule_files/-
+  value: /var/vcap/jobs/elasticsearch_alerts/*.alerts
+- type: replace
+  path: /instance_groups/name=prometheus/jobs/name=mysql_alerts?
+  value: 
+    name: mysql_alerts
+    release: prometheus
+
+
+- type: replace
+  path: /instance_groups/name=database/vm_type
+  value: medium
+- type: replace
+  path: /instance_groups/name=database/networks/name=default/name
+  value: prometheus
+ 
+- type: replace
+  path: /instance_groups/name=grafana/vm_type
+  value: medium
+- type: replace
+  path: /instance_groups/name=grafana/networks/name=default/name
+  value: prometheus
+- type: replace
+  path: /instance_groups/name=grafana/jobs/name=grafana/properties/grafana/prometheus/dashboard_files/-
+  value: /var/vcap/jobs/mysql_dashboards/*.json
+- type: replace
+  path: /instance_groups/name=grafana/jobs/name=grafana/properties/grafana/prometheus/dashboard_files/-
+  value: /var/vcap/jobs/system_dashboards/*.json
+- type: replace
+  path: /instance_groups/name=grafana/jobs/name=grafana/properties/grafana/prometheus/dashboard_files/-
+  value: /var/vcap/jobs/elasticsearch_dashboards/*.json
+- type: replace
+  path: /instance_groups/name=grafana/jobs/name=grafana/properties/grafana/prometheus/dashboard_files/-
+  value: /var/vcap/jobs/shield_dashboards/*.json
+- type: replace
+  path: /instance_groups/name=grafana/jobs/name=mysql_dashboards?
+  value:
+    name: mysql_dashboards
+    release: prometheus
+- type: replace
+  path: /instance_groups/name=grafana/jobs/name=mongodb_dashboards?
+  value:
+    name: mongodb_dashboards
+    release: prometheus
+- type: replace
+  path: /instance_groups/name=grafana/jobs/name=system_dashboards?
+  value:
+    name: system_dashboards
+    release: prometheus
+- type: replace
+  path: /instance_groups/name=grafana/jobs/name=elasticsearch_dashboards?
+  value:
+    name: elasticsearch_dashboards
+    release: prometheus
+- type: replace
+  path: /instance_groups/name=grafana/jobs/name=shield_dashboards?
+  value:
+    name: shield_dashboards
+    release: prometheus
+
+- type: replace
+  path: /instance_groups/name=nginx/vm_type
+  value: small
+- type: replace
+  path: /instance_groups/name=nginx/networks/name=default/name
+  value: prometheus
+
+
+#- type: replace
+  #path: /instance_groups/name=concourse/jobs/name=groundcrew/properties/https_proxy_url?
+  #value: http://10.165.0.139:3128
+#- type: remove
+#  path: /instance_groups/name=concourse/networks/name=((network_name))/static_ips

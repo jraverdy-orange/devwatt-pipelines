@@ -1,6 +1,6 @@
 
 TARGET?=dw
-PIPELINES_LIST?=bosh-stemcell-upload
+PIPELINES_LIST?=bosh-stemcell-upload prometheus-upgrade
 SETTINGS?=settings.yml
 delete-team:
 	fly -t $(TARGET) destroy-team --team-name devwatt --non-interactive

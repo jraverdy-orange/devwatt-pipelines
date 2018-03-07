@@ -1,0 +1,43 @@
+---
+resources:
+
+  - name: prometheus-boshrelease
+    type: git
+    source:
+      uri:    https://github.com/bosh-prometheus/prometheus-boshrelease.git
+      branch: master  
+
+  - name: devwatt-pipelines
+    type: git
+    source:
+      uri:    ((repositories.devwatt-ci.uri))
+      branch: ((repositories.devwatt-ci.branch))
+
+jobs:
+
+- name: upgrade-prometheus
+  plan:
+
+    - get: devwatt-pipelines
+
+    - aggregate:
+      - get: prometheus-boshrelease
+        trigger: true
+
+      - task: create-bosh-config
+        file: devwatt-pipelines/ci/common/tasks/create-bosh-config.yml
+        params:
+          CA_CERT:  ((bosh-server.ca))
+          IP:       ((bosh-server.ip))
+          ALIAS:    ((bosh-server.alias)) 
+          USER:     ((bosh-server.user))
+          PASSWORD: ((bosh-server.password))  
+
+    - task: upgrade-prometheus
+      file: devwatt-pipelines/ci/prometheus-upgrade/upgrade-prometheus/tasks/upgrade-prometheus.yml
+      params:
+          ALIAS:                            ((bosh-server.alias))
+          UAA_BOSH_EXPORTER_CLIENT_SECRET:  ((bosh-server.uaa_bosh_exporter_client_secret))
+          IP:                               ((bosh-server.ip))
+          BOSH_CA:                          ((bosh-server.ca))
+          METRICS_ENVIRONMENT:              ((prometheus.metrics-environment))

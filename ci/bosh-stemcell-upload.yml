@@ -5,6 +5,11 @@ resource_types:
     source:
       repository: swce/keyval-resource
 
+  - name: email
+    type: docker-image
+    source:
+      repository: pcfseceng/email-resource
+
 resources:
 
   - name: ubuntu-stemcell
@@ -25,6 +30,18 @@ resources:
 
   - name: uploaded-version
     type: keyval
+
+
+  - name: send-email
+    type: email
+    source:
+      smtp:
+        host: ((mail.host))
+        port: ((mail.port)) # this must be a string
+        anonymous: true
+        skip_ssl_validation: true
+      from: concourse@dbsp.dw
+      to: ((mail.to))  
 
 jobs:
 
@@ -48,10 +65,25 @@ jobs:
     - task: upload-stemcell-ubuntu
       file: devwatt-pipelines/ci/bosh-stemcell-upload/upload-stemcell/tasks/upload-stemcell.yml
       params:
-          ALIAS:    ((bosh-server.alias))
+          ALIAS:                ((bosh-server.alias))
+          BUILD_PIPELINE_NAME:  ${BUILD_PIPELINE_NAME}
+          BUILD_JOB_NAME:       ${BUILD_JOB_NAME}
+          BUILD_NAME:           ${BUILD_NAME}
+      on_success:  
+        put: send-email
+        params:
+          subject_text: "[Devwatt DBSP] New Ubuntu stemcell upload Succeed"
+          body: output/mail.body
+      on_failure:
+        put: send-email
+        params:
+          subject_text: "[Devwatt DBSP] New Ubuntu stemcell upload Failed!!"
+          body_text: |
+            "A new ubuntu stemcell has failed to be uploaded to the Devwatt bosh director
+            ${BUILD_PIPELINE_NAME}/jobs/${BUILD_JOB_NAME}/builds/${BUILD_NAME}"
 
     - put: uploaded-version
-      params: {file: output/keyval.properties}      
+      params: {file: output/keyval.properties} 
 
 - name: stemcell-cleanup-ubuntu    
   plan:
@@ -94,11 +126,26 @@ jobs:
           ALIAS:    ((bosh-server.alias))
           USER:     ((bosh-server.user))
           PASSWORD: ((bosh-server.password))
-
+      
     - task: upload-stemcell-centos
       file: devwatt-pipelines/ci/bosh-stemcell-upload/upload-stemcell-centos/tasks/upload-stemcell-centos.yml
       params:
         ALIAS:    ((bosh-server.alias))
+        BUILD_PIPELINE_NAME:  ${BUILD_PIPELINE_NAME}
+        BUILD_JOB_NAME:       ${BUILD_JOB_NAME}
+        BUILD_NAME:           ${BUILD_NAME}        
+      on_success:  
+        put: send-email
+        params:
+          subject_text: "[Devwatt DBSP] New CentOS stemcell upload Succeed"
+          body: output/mail.body
+      on_failure:
+        put: send-email
+        params:
+          subject_text: "[Devwatt DBSP] New CentOS stemcell upload Failed!!"
+          body_text: |
+            "A new CentOS stemcell has failed to be uploaded to the Devwatt bosh director
+            ${BUILD_PIPELINE_NAME}/jobs/${BUILD_JOB_NAME}/builds/${BUILD_NAME}"
 
     - put: uploaded-version
       params: {file: output/keyval.properties}

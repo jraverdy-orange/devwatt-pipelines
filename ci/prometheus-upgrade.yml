@@ -39,5 +39,4 @@ jobs:
           ALIAS:                            ((bosh-server.alias))
           UAA_BOSH_EXPORTER_CLIENT_SECRET:  ((bosh-server.uaa_bosh_exporter_client_secret))
           IP:                               ((bosh-server.ip))
-          BOSH_CA:                          ((bosh-server.ca))
           METRICS_ENVIRONMENT:              ((prometheus.metrics-environment))

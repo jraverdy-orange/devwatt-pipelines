@@ -6,6 +6,10 @@ export ROOT_FOLDER=${PWD}
 
 export BOSH_CONFIG=$PWD/bosh-director-config/bosh_config.yml
 
+# forcing release... must to be fixed
+cd ${ROOT_FOLDER}/prometheus-boshrelease
+git checkout v21.1.1 
+cd ${ROOT_FOLDER}
 
 bosh -e ${ALIAS} -d prometheus deploy -n prometheus-boshrelease/manifests/prometheus.yml \
   -o ${ROOT_FOLDER}/devwatt-pipelines/opsfiles/prometheus-opsfile.yml \

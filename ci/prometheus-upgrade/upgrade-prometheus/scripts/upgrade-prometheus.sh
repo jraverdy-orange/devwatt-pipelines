@@ -7,12 +7,17 @@ export ROOT_FOLDER=${PWD}
 export BOSH_CONFIG=$PWD/bosh-director-config/bosh_config.yml
 
 # forcing release... must to be fixed
+
+
+
 cd ${ROOT_FOLDER}/prometheus-boshrelease
-git checkout v21.1.1 
+# retrieving last tag
+last_tag=$(git for-each-ref --sort=-taggerdate --count=1 refs/tags|sed -e "s/.*\/\([^[\/]]*\)/\1/")
+git checkout $last_tag
 cd ${ROOT_FOLDER}
 
 bosh -e ${ALIAS} -d prometheus deploy -n prometheus-boshrelease/manifests/prometheus.yml \
-  -o ${ROOT_FOLDER}/devwatt-pipelines/opsfiles/prometheus-opsfile.yml \
+  -o ${ROOT_FOLDER}/devwatt-pipelines/opsfiles/prometheus2-opsfile.yml \
   -o prometheus-boshrelease/manifests/operators/monitor-bosh.yml \
   -o prometheus-boshrelease/manifests/operators/enable-bosh-uaa.yml \
   -v bosh_url=${IP} \

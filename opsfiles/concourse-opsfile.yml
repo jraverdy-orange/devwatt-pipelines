@@ -1,0 +1,6 @@
+- type: replace
+  path: /instance_groups/name=concourse/jobs/name=worker/properties/http_proxy_url?
+  value: http://10.165.0.139:3128
+- type: replace
+  path: /instance_groups/name=concourse/jobs/name=worker/properties/https_proxy_url?
+  value: http://10.165.0.139:3128

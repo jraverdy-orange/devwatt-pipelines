@@ -1,6 +1,6 @@
 
 TARGET?=dw
-PIPELINES_LIST?=bosh-stemcell-upload prometheus-upgrade postgres-upgrade
+PIPELINES_LIST?=bosh-stemcell-upload prometheus-upgrade postgres-upgrade concourse-upgrade
 SETTINGS?=settings.yml
 delete-team:
 	fly -t $(TARGET) destroy-team --team-name devwatt --non-interactive

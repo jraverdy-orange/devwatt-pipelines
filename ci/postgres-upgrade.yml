@@ -1,0 +1,73 @@
+---
+resource_types:
+- name: email
+  type: docker-image
+  source:
+    repository: pcfseceng/email-resource
+
+resources:
+
+#  - name: postgres-release-version
+#    type: github-release
+#    source:
+#      owner: cloudfoundry
+#      repository: postgres-release
+
+  - name: postgres-release
+    type: bosh-io-release
+    source:
+      repository: cloudfoundry/postgres-release
+
+  - name: devwatt-pipelines
+    type: git
+    source:
+      uri:    ((repositories.devwatt-ci.uri))
+      branch: ((repositories.devwatt-ci.branch))
+
+  - name: send-email
+    type: email
+    source:
+      smtp:
+        host: ((mail.host))
+        port: ((mail.port)) # this must be a string
+        anonymous: true
+        skip_ssl_validation: true
+      from: concourse@dbsp.dw
+      to: ((mail.to))
+
+jobs:
+
+- name: upgrade-postgres
+  plan:
+
+    - get: devwatt-pipelines
+
+    - aggregate:
+      - get: postgres-release
+        trigger: true
+
+      - task: create-bosh-config
+        file: devwatt-pipelines/ci/common/tasks/create-bosh-config.yml
+        params:
+          CA_CERT:  ((bosh-server.ca))
+          IP:       ((bosh-server.ip))
+          ALIAS:    ((bosh-server.alias)) 
+          USER:     ((bosh-server.user))
+          PASSWORD: ((bosh-server.password))  
+
+    - task: upgrade-postgres
+      file: devwatt-pipelines/ci/postgres-upgrade/upgrade-postgres/tasks/upgrade-postgres.yml
+      params:
+          ALIAS:                            ((bosh-server.alias))
+          UAA_BOSH_EXPORTER_CLIENT_SECRET:  ((bosh-server.uaa_bosh_exporter_client_secret))
+          IP:                               ((bosh-server.ip))
+      on_success:
+        put: send-email
+        params:
+          subject_text: "[Devwatt DBSP] ${BUILD_PIPELINE_NAME} Succeed"
+          body_text: "Upgrade Succeed: ${BUILD_PIPELINE_NAME}/jobs/${BUILD_JOB_NAME}/builds/${BUILD_NAME}"
+      on_failure:
+        put: send-email
+        params:
+          subject_text: "[Devwatt DBSP] ${BUILD_PIPELINE_NAME} Failed!!"
+          body_text: "Upgrade failed: ${BUILD_PIPELINE_NAME}/jobs/${BUILD_JOB_NAME}/builds/${BUILD_NAME}"

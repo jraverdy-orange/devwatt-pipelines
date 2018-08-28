@@ -1,0 +1,20 @@
+---
+platform: linux
+
+image_resource:
+  type: docker-image
+  source:
+    repository: concourse/bosh-cli
+    tag: latest
+
+inputs:
+  - name: devwatt-pipelines
+  - name: bosh-director-config
+  - name: centos-stemcell
+
+outputs:
+  - name: output  
+
+run:
+  path: devwatt-pipelines/ci/bosh-stemcell-upload/upload-stemcell/scripts/upload-stemcell-centos.sh
+  

@@ -17,6 +17,11 @@ resources:
     source:
       name: bosh-openstack-kvm-ubuntu-trusty-go_agent
 
+  - name: ubuntu-xenial-stemcell
+    type: bosh-io-stemcell
+    source:
+      name: bosh-openstack-kvm-ubuntu-xenial-go_agent    
+
   - name: centos-stemcell
     type: bosh-io-stemcell
     source:
@@ -72,14 +77,14 @@ jobs:
       on_success:  
         put: send-email
         params:
-          subject_text: "[Devwatt DBSP] New Ubuntu stemcell upload Succeed"
+          subject_text: "[Devwatt DBSP] New Ubuntu trusty stemcell upload Succeed"
           body: output/mail.body
       on_failure:
         put: send-email
         params:
-          subject_text: "[Devwatt DBSP] New Ubuntu stemcell upload Failed!!"
+          subject_text: "[Devwatt DBSP] New Ubuntu trusty stemcell upload Failed!!"
           body_text: |
-            "A new ubuntu stemcell has failed to be uploaded to the Devwatt bosh director
+            "A new ubuntu trusty stemcell has failed to be uploaded to the Devwatt bosh director
             ${BUILD_PIPELINE_NAME}/jobs/${BUILD_JOB_NAME}/builds/${BUILD_NAME}"
 
     - put: uploaded-version
@@ -108,7 +113,72 @@ jobs:
       params:
         ALIAS:        ((bosh-server.alias))
         BS_STEMCELL:  ((stemcell.bootstrap))
-        OS:           ubuntu
+        OS:           ubuntu-trusty
+
+- name: upload-stemcell-ubuntu-xenial
+  plan:
+    - get: devwatt-pipelines
+
+    - aggregate:
+      - get: ubuntu-xenial-stemcell
+        trigger: true
+
+      - task: create-bosh-config
+        file: devwatt-pipelines/ci/common/tasks/create-bosh-config.yml
+        params:
+          CA_CERT:  ((bosh-server.ca))
+          IP:       ((bosh-server.ip))
+          ALIAS:    ((bosh-server.alias)) 
+          USER:     ((bosh-server.user))
+          PASSWORD: ((bosh-server.password))  
+
+    - task: upload-stemcell-ubuntu
+      file: devwatt-pipelines/ci/bosh-stemcell-upload/upload-stemcell/tasks/upload-stemcell-xenial.yml
+      params:
+          ALIAS:                ((bosh-server.alias))
+          BUILD_PIPELINE_NAME:  ${BUILD_PIPELINE_NAME}
+          BUILD_JOB_NAME:       ${BUILD_JOB_NAME}
+          BUILD_NAME:           ${BUILD_NAME}
+      on_success:  
+        put: send-email
+        params:
+          subject_text: "[Devwatt DBSP] New Ubuntu xenial stemcell upload Succeed"
+          body: output/mail.body
+      on_failure:
+        put: send-email
+        params:
+          subject_text: "[Devwatt DBSP] New Ubuntu xenial stemcell upload Failed!!"
+          body_text: |
+            "A new ubuntu xenial stemcell has failed to be uploaded to the Devwatt bosh director
+            ${BUILD_PIPELINE_NAME}/jobs/${BUILD_JOB_NAME}/builds/${BUILD_NAME}"
+
+    - put: uploaded-version
+      params: {file: output/keyval.properties} 
+
+- name: stemcell-cleanup-ubuntu-xenial    
+  plan:
+    - get: devwatt-pipelines
+
+    - aggregate:
+      - get: uploaded-version
+        passed: [upload-stemcell-ubuntu-xenial]
+        trigger: true
+
+      - task: create-bosh-config
+        file: devwatt-pipelines/ci/common/tasks/create-bosh-config.yml
+        params:
+          CA_CERT:  ((bosh-server.ca))
+          IP:       ((bosh-server.ip))
+          ALIAS:    ((bosh-server.alias))
+          USER:     ((bosh-server.user))
+          PASSWORD: ((bosh-server.password))
+
+    - task: old-stemcells-cleanup
+      file: devwatt-pipelines/ci/bosh-stemcell-upload/old-stemcells-cleanup/tasks/old-stemcells-cleanup.yml
+      params:
+        ALIAS:        ((bosh-server.alias))
+        BS_STEMCELL:  ((stemcell.bootstrap))
+        OS:           ubuntu-xenial
 
 - name: upload-stemcell-centos
   plan:
@@ -128,7 +198,7 @@ jobs:
           PASSWORD: ((bosh-server.password))
       
     - task: upload-stemcell-centos
-      file: devwatt-pipelines/ci/bosh-stemcell-upload/upload-stemcell-centos/tasks/upload-stemcell-centos.yml
+      file: devwatt-pipelines/ci/bosh-stemcell-upload/upload-stemcell/tasks/upload-stemcell-centos.yml
       params:
         ALIAS:    ((bosh-server.alias))
         BUILD_PIPELINE_NAME:  ${BUILD_PIPELINE_NAME}

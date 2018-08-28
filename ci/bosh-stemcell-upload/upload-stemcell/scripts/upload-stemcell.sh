@@ -14,6 +14,6 @@ cd ${ROOT_FOLDER}/output || exit 666
 
 echo "version="$(cat ${ROOT_FOLDER}/ubuntu-stemcell/version) > keyval.properties
 
-echo "A new ubuntu stemcell ($(cat ${ROOT_FOLDER}/ubuntu-stemcell/version)) has been succesfully uploaded to the Devwatt bosh director
+echo "A new ubuntu trusty stemcell ($(cat ${ROOT_FOLDER}/ubuntu-stemcell/version)) has been succesfully uploaded to the Devwatt bosh director
 
 ${BUILD_PIPELINE_NAME}/jobs/${BUILD_JOB_NAME}/builds/${BUILD_NAME}" > mail.body

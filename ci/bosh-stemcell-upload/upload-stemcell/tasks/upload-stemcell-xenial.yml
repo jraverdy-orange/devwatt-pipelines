@@ -10,11 +10,11 @@ image_resource:
 inputs:
   - name: devwatt-pipelines
   - name: bosh-director-config
-  - name: centos-stemcell
+  - name: ubuntu-xenial-stemcell
 
 outputs:
-  - name: output  
+  - name: output    
 
 run:
-  path: devwatt-pipelines/ci/bosh-stemcell-upload/upload-stemcell-centos/scripts/upload-stemcell-centos.sh
+  path: devwatt-pipelines/ci/bosh-stemcell-upload/upload-stemcell/scripts/upload-stemcell-xenial.sh
   

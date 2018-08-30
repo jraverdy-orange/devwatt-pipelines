@@ -7,7 +7,14 @@ resource_types:
 
 resources:
 
-  - name: prometheus-boshrelease
+
+  - name: prometheus-release
+    type: github-release
+    source:
+      owner: bosh-prometheus
+      repository: prometheus-boshrelease
+
+  - name: prometheus-release-src
     type: git
     source:
       uri:    https://github.com/bosh-prometheus/prometheus-boshrelease.git
@@ -38,8 +45,11 @@ jobs:
     - get: devwatt-pipelines
 
     - aggregate:
-      - get: prometheus-boshrelease
+      - get: prometheus-release
         trigger: true
+
+      - get: prometheus-release-src
+
 
       - task: create-bosh-config
         file: devwatt-pipelines/ci/common/tasks/create-bosh-config.yml

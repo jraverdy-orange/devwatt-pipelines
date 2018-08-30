@@ -10,7 +10,8 @@ image_resource:
 inputs:
   - name: devwatt-pipelines
   - name: bosh-director-config
-  - name: prometheus-boshrelease
+  - name: prometheus-release
+  - name: prometheus-release-src
 
 run:
   path: devwatt-pipelines/ci/prometheus-upgrade/upgrade-prometheus/scripts/upgrade-prometheus.sh

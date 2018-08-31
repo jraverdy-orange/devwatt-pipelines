@@ -7,10 +7,10 @@ resource_types:
 
 resources:
 
-  - name: concourse-release-src
+  - name: concourse-bosh-deployment
     type: git
     source:
-      uri: https://github.com/concourse/concourse.git
+      uri: https://github.com/concourse/concourse-bosh-deployment.git
       branch: master
 
   - name: concourse-release
@@ -24,16 +24,16 @@ resources:
       uri:    ((repositories.devwatt-ci.uri))
       branch: ((repositories.devwatt-ci.branch))
 
-#  - name: send-email
-#    type: email
-#    source:
-#      smtp:
-#        host: ((mail.host))
-#        port: ((mail.port)) # this must be a string
-#        anonymous: true
-#        skip_ssl_validation: true
-#      from: concourse@dbsp.dw
-#      to: ((mail.to))
+  - name: send-email
+    type: email
+    source:
+      smtp:
+        host: ((mail.host))
+        port: ((mail.port)) # this must be a string
+        anonymous: true
+        skip_ssl_validation: true
+      from: concourse@dbsp.dw
+      to: ((mail.to))
 
 jobs:
 
@@ -46,7 +46,7 @@ jobs:
       - get: concourse-release
         trigger: true
 
-      - get: concourse-release-src  
+      - get: concourse-bosh-deployment
 
       - task: create-bosh-config
         file: devwatt-pipelines/ci/common/tasks/create-bosh-config.yml
@@ -55,7 +55,7 @@ jobs:
           IP:       ((bosh-server.ip))
           ALIAS:    ((bosh-server.alias)) 
           USER:     ((bosh-server.user))
-          PASSWORD: ((bosh-server.password))  
+          PASSWORD: ((bosh-server.password))
 
     - task: upgrade-concourse
       file: devwatt-pipelines/ci/concourse-upgrade/upgrade-concourse/tasks/upgrade-concourse.yml
@@ -63,14 +63,20 @@ jobs:
           ALIAS:                            ((bosh-server.alias))
           UAA_BOSH_EXPORTER_CLIENT_SECRET:  ((bosh-server.uaa_bosh_exporter_client_secret))
           IP:                               ((bosh-server.ip))
+          FLOATING_IP:                      ((concourse.floating_ip))
+          HTTP_PROXY:                       ((concourse.http_proxy))
+          HTTPS_PROXY:                      ((concourse.https_proxy))
+          PROMETHEUS_PORT:                  ((prometheus.port))
+          MAIN_TEAM_USERS:                  ((concourse.main_team_local_users))
+          LOCAL_USERS:                      ((concourse.create_users))
              
-    #  on_success:
-    #    put: send-email
-    #    params:
-    #      subject_text: "[Devwatt DBSP] ${BUILD_PIPELINE_NAME} Succeed"
-    #      body_text: "Upgrade Succeed: ${BUILD_PIPELINE_NAME}/jobs/${BUILD_JOB_NAME}/builds/${BUILD_NAME}"
-    #  on_failure:
-    #    put: send-email
-    #    params:
-    #      subject_text: "[Devwatt DBSP] ${BUILD_PIPELINE_NAME} Failed!!"
-    #      body_text: "Upgrade failed: ${BUILD_PIPELINE_NAME}/jobs/${BUILD_JOB_NAME}/builds/${BUILD_NAME}"
+      on_success:
+        put: send-email
+        params:
+          subject_text: "[Devwatt DBSP] ${BUILD_PIPELINE_NAME} Succeed"
+          body_text: "Upgrade Succeed: ${BUILD_PIPELINE_NAME}/jobs/${BUILD_JOB_NAME}/builds/${BUILD_NAME}"
+      on_failure:
+        put: send-email
+        params:
+          subject_text: "[Devwatt DBSP] ${BUILD_PIPELINE_NAME} Failed!!"
+          body_text: "Upgrade failed: ${BUILD_PIPELINE_NAME}/jobs/${BUILD_JOB_NAME}/builds/${BUILD_NAME}"

@@ -1,6 +1,19 @@
-- type: replace
-  path: /instance_groups/name=concourse/jobs/name=worker/properties/http_proxy_url?
-  value: http://10.165.0.139:3128
-- type: replace
-  path: /instance_groups/name=concourse/jobs/name=worker/properties/https_proxy_url?
-  value: http://10.165.0.139:3128
+# Local releases when deployment is in an environment with no Internet access
+
+- type: remove
+  path: /releases/name=concourse/sha1
+
+- type: remove
+  path: /releases/name=concourse/url
+
+- type: remove
+  path: /releases/name=garden-runc/sha1
+
+- type: remove
+  path: /releases/name=garden-runc/url
+
+- type: remove
+  path: /releases/name=postgres/sha1
+
+- type: remove
+  path: /releases/name=postgres/url

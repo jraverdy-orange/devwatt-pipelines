@@ -20,8 +20,6 @@ cd ${ROOT_FOLDER}/prometheus-release-src
 # checkout the right tag
 git checkout $(cat ${ROOT_FOLDER}/prometheus-release/tag)
 
-exit 1
-
 bosh -e ${ALIAS} -d prometheus deploy -n manifests/prometheus.yml \
   -o ${ROOT_FOLDER}/devwatt-pipelines/opsfiles/prometheus2-opsfile.yml \
   -o ${ROOT_FOLDER}/devwatt-pipelines/opsfiles/use-last-postgres-release-opsfile.yml \

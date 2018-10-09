@@ -13,13 +13,13 @@
   value: prometheus
 - type: replace
   path: /instance_groups/name=prometheus2/jobs/name=prometheus2/properties/prometheus/rule_files/-
-  value: /var/vcap/jobs/mysql_alerts/*.alerts
+  value: /var/vcap/jobs/mysql_alerts/*.alerts.yml
 - type: replace
   path: /instance_groups/name=prometheus2/jobs/name=prometheus2/properties/prometheus/rule_files/-
-  value: /var/vcap/jobs/shield_alerts/*.alerts
+  value: /var/vcap/jobs/shield_alerts/*.alerts.yml
 - type: replace
   path: /instance_groups/name=prometheus2/jobs/name=prometheus2/properties/prometheus/rule_files/-
-  value: /var/vcap/jobs/elasticsearch_alerts/*.alerts
+  value: /var/vcap/jobs/elasticsearch_alerts/*.alerts.yml
 - type: replace
   path: /instance_groups/name=prometheus2/jobs/name=mysql_alerts?
   value: 

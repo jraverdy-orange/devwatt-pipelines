@@ -9,8 +9,6 @@ export BOSH_CONFIG=$PWD/bosh-director-config/bosh_config.yml
 
 cd ${ROOT_FOLDER}/prometheus-release
 
-
-
 [ ! -f prometheus*.tgz ] && exit 1 || FILE=$(ls prometheus*.tgz|tail -1)
 
 # uploading the release
@@ -21,6 +19,8 @@ cd ${ROOT_FOLDER}/prometheus-release-src
 
 # checkout the right tag
 git checkout $(cat ${ROOT_FOLDER}/prometheus-release/tag)
+
+exit 1
 
 bosh -e ${ALIAS} -d prometheus deploy -n manifests/prometheus.yml \
   -o ${ROOT_FOLDER}/devwatt-pipelines/opsfiles/prometheus2-opsfile.yml \

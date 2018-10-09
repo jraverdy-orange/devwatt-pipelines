@@ -26,16 +26,16 @@ resources:
       uri:    ((repositories.devwatt-ci.uri))
       branch: ((repositories.devwatt-ci.branch))
 
-  - name: send-email
-    type: email
-    source:
-      smtp:
-        host: ((mail.host))
-        port: ((mail.port)) # this must be a string
-        anonymous: true
-        skip_ssl_validation: true
-      from: concourse@dbsp.dw
-      to: ((mail.to))
+ # - name: send-email
+ #   type: email
+ #   source:
+ #     smtp:
+ #       host: ((mail.host))
+ #       port: ((mail.port)) # this must be a string
+ #       anonymous: true
+ #       skip_ssl_validation: true
+ #     from: concourse@dbsp.dw
+ #     to: ((mail.to))
 
 jobs:
 
@@ -67,13 +67,13 @@ jobs:
           UAA_BOSH_EXPORTER_CLIENT_SECRET:  ((bosh-server.uaa_bosh_exporter_client_secret))
           IP:                               ((bosh-server.ip))
           METRICS_ENVIRONMENT:              ((prometheus.metrics-environment))
-      on_success:  
-        put: send-email
-        params:
-          subject_text: "[Devwatt DBSP] ${BUILD_PIPELINE_NAME} Succeed"
-          body_text: "Upgrade Succeed: ${BUILD_PIPELINE_NAME}/jobs/${BUILD_JOB_NAME}/builds/${BUILD_NAME}"
-      on_failure:
-        put: send-email
-        params:
-          subject_text: "[Devwatt DBSP] ${BUILD_PIPELINE_NAME} Failed!!"
-          body_text: "Upgrade failed: ${BUILD_PIPELINE_NAME}/jobs/${BUILD_JOB_NAME}/builds/${BUILD_NAME}"
+#      on_success:  
+#        put: send-email
+#        params:
+#          subject_text: "[Devwatt DBSP] ${BUILD_PIPELINE_NAME} Succeed"
+#          body_text: "Upgrade Succeed: ${BUILD_PIPELINE_NAME}/jobs/${BUILD_JOB_NAME}/builds/${BUILD_NAME}"
+#      on_failure:
+#        put: send-email
+#        params:
+#          subject_text: "[Devwatt DBSP] ${BUILD_PIPELINE_NAME} Failed!!"
+#          body_text: "Upgrade failed: ${BUILD_PIPELINE_NAME}/jobs/${BUILD_JOB_NAME}/builds/${BUILD_NAME}"

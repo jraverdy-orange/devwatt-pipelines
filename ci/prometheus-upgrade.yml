@@ -17,14 +17,20 @@ resources:
   - name: prometheus-release-src
     type: git
     source:
-      uri:    https://github.com/bosh-prometheus/prometheus-boshrelease.git
-      branch: master  
+      #uri:    https://github.com/bosh-prometheus/prometheus-boshrelease.git
+      uri: ((repositories.prometheus.uri))
+      #branch: master
+      branch: ((repositories.prometheus.branch))
+      username: ((repositories.prometheus.username))
+      password: ((repositories.prometheus.password))  
 
   - name: devwatt-pipelines
     type: git
     source:
       uri:    ((repositories.devwatt-ci.uri))
       branch: ((repositories.devwatt-ci.branch))
+      username: ((repositories.devwatt-ci.username))
+      password: ((repositories.devwatt-ci.password))
 
   - name: send-email
     type: email
